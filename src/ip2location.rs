@@ -52,7 +52,7 @@ impl IP2Location {
             }
         }
 
-        return None;
+        None
     }
 }
 

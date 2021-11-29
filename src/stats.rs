@@ -45,7 +45,7 @@ impl Stats {
             .iter()
             .map(|(country_name, numberofbans)| CountryBans {
                 country_name: country_name.clone(),
-                numberofbans: numberofbans.clone(),
+                numberofbans: *numberofbans,
             })
             .collect();
         country_bans.sort_by(|a, b| b.numberofbans.cmp(&a.numberofbans));

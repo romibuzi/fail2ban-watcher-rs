@@ -5,8 +5,6 @@ use std::time::Instant;
 use ansi_term::Colour::{Blue, Green, Red, Yellow};
 use clap::Parser;
 use csv::ReaderBuilder;
-use env_logger;
-use log;
 use rusqlite::{Connection, OpenFlags};
 use rust_embed::RustEmbed;
 
@@ -88,7 +86,7 @@ fn program(
     println!("{}", Blue.paint("Starting analysis"));
     let start = Instant::now();
 
-    let init_ip2location_thread = thread::spawn(|| init_ip2location());
+    let init_ip2location_thread = thread::spawn(init_ip2location);
     let get_bans_thread = thread::spawn(|| get_bans_from_fail2ban_db(fail2ban_db_path));
 
     let ip2location = init_ip2location_thread.join().unwrap()?;
