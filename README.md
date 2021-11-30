@@ -1,6 +1,8 @@
 fail2ban-watcher-rs
 =====
 
+Display the most banned countries and ips from a [fail2ban](https://www.fail2ban.org) database.
+
 ### Demo
 
 ![demo](demo.gif)
