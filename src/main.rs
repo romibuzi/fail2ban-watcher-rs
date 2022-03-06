@@ -113,7 +113,7 @@ struct Opts {
     #[clap(
         short,
         long,
-        about = "fail2ban db to analyze",
+        help = "fail2ban db to analyze",
         default_value = "/var/lib/fail2ban/fail2ban.sqlite3"
     )]
     fail2ban_db_path: String,
@@ -121,7 +121,7 @@ struct Opts {
     #[clap(
         short,
         long,
-        about = "number of elements to display",
+        help = "number of elements to display",
         default_value = "10"
     )]
     nb_display: usize,
