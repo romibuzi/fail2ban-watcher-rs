@@ -14,13 +14,13 @@ Rust : https://www.rust-lang.org/tools/install
 ### Build
 
 ```bash
-$ cargo build --release
+cargo build --release
 ```
 
 ### Run
 
 ```bash
-$ ./target/release/fail2ban-watcher-rs --help
+.target/release/fail2ban-watcher-rs --help
 fail2ban-watcher-rs 1.0
 Romain A. <romain.ardiet@gmail.com>
 
@@ -41,18 +41,18 @@ OPTIONS:
 ### Tests
 
 ```bash
-$ cargo test
+cargo test
 ```
 
 ### Cross compilation
 
 ```bash
-$ cargo install cross
-$ TARGET=x86_64-unknown-linux-gnu # https://doc.rust-lang.org/stable/rustc/platform-support.html
-$ cross build --release --target=$TARGET
+cargo install cross
+TARGET=x86_64-unknown-linux-gnu # https://doc.rust-lang.org/stable/rustc/platform-support.html
+cross build --release --target=$TARGET
 
 # then run the binary
-$ ./target/$TARGET/release/fail2ban-watcher-rs
+./target/$TARGET/release/fail2ban-watcher-rs
 ```
 
 ### Credits
