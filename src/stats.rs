@@ -10,25 +10,38 @@ pub struct CountryBans {
 
 pub struct Stats {
     banned_ips_sorted_by_bans_count: Vec<LocatedBannedIp>,
-    bans_count_per_country: HashMap<String, i32>,
+    countries_sorted_by_bans_count: Vec<CountryBans>,
 }
 
 impl Stats {
     pub fn new(mut banned_ips: Vec<LocatedBannedIp>) -> Stats {
-        banned_ips.sort_by(|a, b| b.numberofbans.cmp(&a.numberofbans));
+        let mut numberofbans_per_country = Stats::get_numberofbans_per_country(&banned_ips);
 
-        let mut bans_per_country: HashMap<String, i32> = HashMap::new();
+        banned_ips.sort_by(|a, b| b.numberofbans.cmp(&a.numberofbans));
+        numberofbans_per_country.sort_by(|a, b| b.numberofbans.cmp(&a.numberofbans));
+
+        Stats {
+            banned_ips_sorted_by_bans_count: banned_ips,
+            countries_sorted_by_bans_count: numberofbans_per_country,
+        }
+    }
+
+    fn get_numberofbans_per_country(banned_ips: &[LocatedBannedIp]) -> Vec<CountryBans> {
+        let mut numberofbans_per_country: HashMap<String, i32> = HashMap::new();
         banned_ips.iter().for_each(|banned_ip| {
-            let count = bans_per_country
+            let count = numberofbans_per_country
                 .entry(banned_ip.country_name.clone())
                 .or_insert(0);
             *count += banned_ip.numberofbans;
         });
 
-        Stats {
-            banned_ips_sorted_by_bans_count: banned_ips,
-            bans_count_per_country: bans_per_country,
-        }
+        numberofbans_per_country
+            .iter()
+            .map(|(country_name, numberofbans)| CountryBans {
+                country_name: country_name.clone(),
+                numberofbans: *numberofbans,
+            })
+            .collect()
     }
 
     pub fn get_top_banned_ips(&self, limit: usize) -> Vec<LocatedBannedIp> {
@@ -40,21 +53,11 @@ impl Stats {
     }
 
     pub fn get_top_banned_countries(&self, limit: usize) -> Vec<CountryBans> {
-        let mut country_bans: Vec<CountryBans> = self
-            .bans_count_per_country
-            .iter()
-            .map(|(country_name, numberofbans)| CountryBans {
-                country_name: country_name.clone(),
-                numberofbans: *numberofbans,
-            })
-            .collect();
-        country_bans.sort_by(|a, b| b.numberofbans.cmp(&a.numberofbans));
-
-        if limit >= country_bans.len() {
-            return country_bans;
+        if limit >= self.countries_sorted_by_bans_count.len() {
+            return self.countries_sorted_by_bans_count.to_vec();
         }
 
-        country_bans[..limit].to_vec()
+        self.countries_sorted_by_bans_count[..limit].to_vec()
     }
 }
 

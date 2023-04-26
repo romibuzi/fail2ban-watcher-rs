@@ -133,7 +133,7 @@ fn main() {
 
     if let Err(error) = program(opts.fail2ban_db_path, opts.nb_display) {
         let error_msg = format!("Error while running program: {}", error);
-        println!("{}", Red.paint(error_msg));
+        eprintln!("{}", Red.paint(error_msg));
 
         process::exit(1);
     }
