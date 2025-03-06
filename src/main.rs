@@ -17,13 +17,14 @@ mod ip2location;
 mod ipconverter;
 mod stats;
 
+const IP2LOCATION_DATABASE: &str = "IP2LOCATION-LITE-DB1.csv";
+
 #[derive(RustEmbed)]
 #[folder = "resources/"]
 struct Resources;
 
 fn init_ip2location() -> Result<IP2Location, std::io::Error> {
-    let ip2location_resource = "ip2location.csv";
-    match Resources::get(ip2location_resource) {
+    match Resources::get(IP2LOCATION_DATABASE) {
         Some(file) => {
             let mut reader = ReaderBuilder::new()
                 .has_headers(false)
@@ -33,7 +34,7 @@ fn init_ip2location() -> Result<IP2Location, std::io::Error> {
         }
         None => Err(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            format!("Could not find `{}` file", ip2location_resource),
+            format!("Could not find `{}` file", IP2LOCATION_DATABASE),
         )),
     }
 }
