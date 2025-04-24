@@ -1,6 +1,8 @@
 fail2ban-watcher-rs
 =====
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/861d7dc2720a4513a4b4abdf1d56947c)](https://app.codacy.com/gh/romibuzi/fail2ban-watcher-rs?utm_source=github.com&utm_medium=referral&utm_content=romibuzi/fail2ban-watcher-rs&utm_campaign=Badge_Grade)
+
 Display the most banned countries and ips from a [fail2ban](https://www.fail2ban.org) database.
 
 ### Demo
