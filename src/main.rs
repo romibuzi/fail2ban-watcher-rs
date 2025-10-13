@@ -17,7 +17,7 @@ mod ip2location;
 mod ipconverter;
 mod stats;
 
-const IP2LOCATION_DATABASE: &str = "IP2LOCATION-LITE-DB1.csv";
+const IP2LOCATION_DATABASE: &str = "IP2LOCATION-LITE-DB1.CSV";
 
 #[derive(RustEmbed)]
 #[folder = "resources/"]
