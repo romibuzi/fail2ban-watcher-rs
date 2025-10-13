@@ -109,12 +109,12 @@ fn program(
 }
 
 #[derive(Parser)]
-#[clap(version = "1.0", author = "Romain A. <romain.ardiet@gmail.com>")]
+#[clap(version = "1.0", author = "Romain A. <contact@romainardiet.com>")]
 struct Opts {
     #[clap(
         short,
         long,
-        help = "fail2ban db to analyze",
+        help = "fail2ban database to analyze",
         default_value = "/var/lib/fail2ban/fail2ban.sqlite3"
     )]
     fail2ban_db_path: String,
