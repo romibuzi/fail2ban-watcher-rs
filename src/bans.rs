@@ -35,14 +35,15 @@ impl fmt::Display for LocatedBannedIp {
 pub fn get_banned_ips(connection: &Connection) -> Result<Vec<BannedIp>> {
     let mut stmt = connection
         .prepare("SELECT ip, COUNT(ip) AS count FROM bans GROUP BY ip ORDER BY count DESC")?;
-    let bans = stmt.query_map([], |row| {
-        Ok(BannedIp {
-            ip: row.get(0)?,
-            number_of_bans: row.get(1)?,
-        })
-    })?
-    .filter_map(Result::ok)
-    .collect();
+    let bans = stmt
+        .query_map([], |row| {
+            Ok(BannedIp {
+                ip: row.get(0)?,
+                number_of_bans: row.get(1)?,
+            })
+        })?
+        .filter_map(Result::ok)
+        .collect();
 
     Ok(bans)
 }
