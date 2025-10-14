@@ -45,43 +45,44 @@ fn get_bans_from_fail2ban_db(fail2ban_db_path: String) -> Result<Vec<BannedIp>, 
 }
 
 fn locate_banned_ips(ip2location: &IP2Location, banned_ips: &[BannedIp]) -> Vec<LocatedBannedIp> {
-    let mut located_banned_ips: Vec<LocatedBannedIp> = Vec::with_capacity(banned_ips.len());
+    banned_ips
+        .iter()
+        .filter_map(|banned_ip| {
+            let country = ipconverter::ipv4_to_u32(&banned_ip.ip)
+                .ok()
+                .and_then(|target_ip| ip2location.find_country_name_of_ip(target_ip));
 
-    for banned_ip in banned_ips {
-        let country = ipconverter::ipv4_to_u32(&banned_ip.ip)
-            .ok()
-            .and_then(|target_ip| ip2location.find_country_name_of_ip(target_ip));
-
-        match country {
-            Some(country_name) => located_banned_ips.push(LocatedBannedIp {
-                ip: banned_ip.clone(),
-                country_name,
-            }),
-
-            None => log::warn!("Could not locate country of ip {}", &banned_ip.ip),
-        }
-    }
-
-    located_banned_ips
+            match country {
+                Some(country_name) => Some(LocatedBannedIp {
+                    ip: banned_ip.clone(),
+                    country_name,
+                }),
+                None => {
+                    log::warn!("Could not locate country of ip {}", &banned_ip.ip);
+                    None
+                }
+            }
+        })
+        .collect()
 }
 
-fn display_top_banned_countries(stats: &Stats, number_of_elements_to_display: usize) {
+fn display_top_banned_countries(stats: &Stats, display_limit: usize) {
     println!("\n{}", Yellow.paint("Top banned countries:"));
-    for country in stats.get_top_banned_countries(number_of_elements_to_display) {
+    for country in stats.get_top_banned_countries(display_limit) {
         println!("{} bans: {}", country.number_of_bans, country.country_name);
     }
 }
 
-fn display_top_banned_ips(stats: &Stats, number_of_elements_to_display: usize) {
+fn display_top_banned_ips(stats: &Stats, display_limit: usize) {
     println!("\n{}", Yellow.paint("Top banned IPs:"));
-    for ip in stats.get_top_banned_ips(number_of_elements_to_display) {
+    for ip in stats.get_top_banned_ips(display_limit) {
         println!("{}", ip);
     }
 }
 
 fn program(
     fail2ban_db_path: String,
-    number_of_elements_to_displays: usize,
+    display_limit: usize,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", Blue.paint("Starting analysis"));
     let start = Instant::now();
@@ -95,8 +96,8 @@ fn program(
     let located_banned_ips = locate_banned_ips(&ip2location, &bans);
     let stats = Stats::new(located_banned_ips);
 
-    display_top_banned_ips(&stats, number_of_elements_to_displays);
-    display_top_banned_countries(&stats, number_of_elements_to_displays);
+    display_top_banned_ips(&stats, display_limit);
+    display_top_banned_countries(&stats, display_limit);
 
     let completion_msg = format!(
         "\nAnalysis completed in {:.2} seconds",
@@ -124,14 +125,14 @@ struct Opts {
         help = "number of elements to display",
         default_value = "10"
     )]
-    nb_display: usize,
+    display_limit: usize,
 }
 
 fn main() {
     env_logger::init();
     let opts: Opts = Opts::parse();
 
-    if let Err(error) = program(opts.fail2ban_db_path, opts.nb_display) {
+    if let Err(error) = program(opts.fail2ban_db_path, opts.display_limit) {
         let error_msg = format!("Error while running program: {}", error);
         eprintln!("{}", Red.paint(error_msg));
 
