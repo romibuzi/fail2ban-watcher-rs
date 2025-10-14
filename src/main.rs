@@ -48,14 +48,13 @@ fn locate_banned_ips(ip2location: &IP2Location, banned_ips: &[BannedIp]) -> Vec<
     let mut located_banned_ips: Vec<LocatedBannedIp> = Vec::with_capacity(banned_ips.len());
 
     for banned_ip in banned_ips {
-        let country = ipconverter::ipv4_to_long(&banned_ip.ip)
+        let country = ipconverter::ipv4_to_u32(&banned_ip.ip)
             .ok()
-            .and_then(|ip_long| ip2location.find_country_name_of_ip(ip_long));
+            .and_then(|target_ip| ip2location.find_country_name_of_ip(target_ip));
 
         match country {
             Some(country_name) => located_banned_ips.push(LocatedBannedIp {
-                ip: banned_ip.ip.clone(),
-                numberofbans: banned_ip.numberofbans,
+                ip: banned_ip.clone(),
                 country_name,
             }),
 
@@ -69,14 +68,14 @@ fn locate_banned_ips(ip2location: &IP2Location, banned_ips: &[BannedIp]) -> Vec<
 fn display_top_banned_countries(stats: &Stats, number_of_elements_to_display: usize) {
     println!("\n{}", Yellow.paint("Top banned countries:"));
     for country in stats.get_top_banned_countries(number_of_elements_to_display) {
-        println!("{} bans: {}", country.numberofbans, country.country_name);
+        println!("{} bans: {}", country.number_of_bans, country.country_name);
     }
 }
 
 fn display_top_banned_ips(stats: &Stats, number_of_elements_to_display: usize) {
     println!("\n{}", Yellow.paint("Top banned IPs:"));
     for ip in stats.get_top_banned_ips(number_of_elements_to_display) {
-        println!("{} bans: {} ({})", ip.numberofbans, ip.ip, ip.country_name);
+        println!("{}", ip);
     }
 }
 
