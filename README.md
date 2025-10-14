@@ -23,21 +23,17 @@ cargo build --release
 
 ```bash
 .target/release/fail2ban-watcher-rs --help
-fail2ban-watcher-rs 1.0
-Romain A. <romain.ardiet@gmail.com>
+Usage: fail2ban-watcher-rs [OPTIONS]
 
-USAGE:
-    fail2ban-watcher-rs [OPTIONS]
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -f, --fail2ban-db-path <fail2ban-db-path>
-            fail2ban db to analyze [default: /var/lib/fail2ban/fail2ban.sqlite3]
-
-    -n, --nb-display <nb-display>                number of elements to display [default: 10]
+Options:
+  -f, --fail2ban-db-path <FAIL2BAN_DB_PATH>
+          fail2ban database to analyze [default: /var/lib/fail2ban/fail2ban.sqlite3]
+  -d, --display-limit <DISPLAY_LIMIT>
+          number of elements to display [default: 10]
+  -h, --help
+          Print help
+  -V, --version
+          Print version
 ```
 
 ### Tests
