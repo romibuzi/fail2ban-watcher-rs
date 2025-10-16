@@ -1,10 +1,11 @@
 use csv::Reader;
 use serde::Deserialize;
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, Deserialize, Eq, PartialEq)]
 struct IPRange {
-    start: i64,
-    end: i64,
+    start: u32,
+    end: u32,
     country_code: String,
     country_name: String,
 }
@@ -29,30 +30,19 @@ impl IP2Location {
         IP2Location { ranges }
     }
 
-    pub fn find_country_name_of_ip(&self, target_ip_long: i64) -> Option<String> {
-        let mut low: i32 = 0;
-        let mut high: i32 = self.ranges.len() as i32 - 1;
-
-        while low <= high {
-            let mid = (low + high) / 2;
-            let range = self.ranges.get(mid as usize).unwrap();
-
-            if range.start <= target_ip_long && target_ip_long <= range.end {
-                return Some(range.country_name.clone());
+    pub fn find_country_name_of_ip(&self, target_ip: u32) -> Option<String> {
+        match self.ranges.binary_search_by(|range| {
+            if target_ip < range.start {
+                Ordering::Greater
+            } else if target_ip > range.end {
+                Ordering::Less
+            } else {
+                Ordering::Equal
             }
-
-            // Search values that are greater than range -> to right of current mid_index
-            if range.start < target_ip_long {
-                low = mid + 1;
-            }
-
-            // Search values that are less than range -> to the left of current mid_index
-            if range.start > target_ip_long {
-                high = mid - 1;
-            }
+        }) {
+            Ok(index) => Some(self.ranges[index].country_name.clone()),
+            Err(_) => None,
         }
-
-        None
     }
 }
 

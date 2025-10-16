@@ -1,31 +1,51 @@
 use rusqlite::{Connection, Result};
+use std::fmt;
+use std::ops::Deref;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct BannedIp {
     pub ip: String,
-    pub numberofbans: i32,
+    pub number_of_bans: u32,
 }
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct LocatedBannedIp {
-    pub ip: String,
-    pub numberofbans: i32,
+    pub ip: BannedIp,
     pub country_name: String,
 }
 
-pub fn get_banned_ips(connection: &Connection) -> Result<Vec<BannedIp>, rusqlite::Error> {
+impl Deref for LocatedBannedIp {
+    type Target = BannedIp;
+
+    fn deref(&self) -> &Self::Target {
+        &self.ip
+    }
+}
+
+impl fmt::Display for LocatedBannedIp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} bans: {} ({})",
+            self.number_of_bans, self.ip.ip, self.country_name
+        )
+    }
+}
+
+pub fn get_banned_ips(connection: &Connection) -> Result<Vec<BannedIp>> {
     let mut stmt = connection
-        .prepare("SELECT ip, count(ip) AS count FROM bans GROUP BY ip ORDER BY count DESC")?;
-    let bans = stmt.query_map([], |row| {
-        Ok(BannedIp {
-            ip: row.get(0)?,
-            numberofbans: row.get(1)?,
-        })
-    })?;
+        .prepare("SELECT ip, COUNT(ip) AS count FROM bans GROUP BY ip ORDER BY count DESC")?;
+    let bans = stmt
+        .query_map([], |row| {
+            Ok(BannedIp {
+                ip: row.get(0)?,
+                number_of_bans: row.get(1)?,
+            })
+        })?
+        .filter_map(Result::ok)
+        .collect();
 
-    let result: Vec<BannedIp> = bans.filter_map(Result::ok).collect();
-
-    Ok(result)
+    Ok(bans)
 }
 
 #[cfg(test)]
@@ -72,11 +92,11 @@ mod tests {
             vec![
                 BannedIp {
                     ip: String::from("182.54.178.52"),
-                    numberofbans: 2,
+                    number_of_bans: 2,
                 },
                 BannedIp {
                     ip: String::from("126.1.16.32"),
-                    numberofbans: 1,
+                    number_of_bans: 1,
                 }
             ]
         );
