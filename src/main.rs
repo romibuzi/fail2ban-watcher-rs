@@ -99,19 +99,21 @@ fn program(
     display_top_banned_ips(&stats, display_limit);
     display_top_banned_countries(&stats, display_limit);
 
-    let completion_msg = format!(
-        "\nAnalysis completed in {:.2} seconds",
-        start.elapsed().as_secs_f32()
+    println!(
+        "\n{}",
+        Green.paint(format!(
+            "Analysis completed in {:.2} seconds",
+            start.elapsed().as_secs_f32()
+        ))
     );
-    println!("{}", Green.paint(completion_msg));
 
     Ok(())
 }
 
 #[derive(Parser)]
-#[clap(version = "1.0", author = "Romain A. <contact@romainardiet.com>")]
-struct Opts {
-    #[clap(
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(
         short,
         long,
         help = "fail2ban database to analyze",
@@ -119,7 +121,7 @@ struct Opts {
     )]
     fail2ban_db_path: String,
 
-    #[clap(
+    #[arg(
         short,
         long,
         help = "number of elements to display",
@@ -130,9 +132,9 @@ struct Opts {
 
 fn main() {
     env_logger::init();
-    let opts: Opts = Opts::parse();
+    let args = Args::parse();
 
-    if let Err(error) = program(opts.fail2ban_db_path, opts.display_limit) {
+    if let Err(error) = program(args.fail2ban_db_path, args.display_limit) {
         let error_msg = format!("Error while running program: {}", error);
         eprintln!("{}", Red.paint(error_msg));
 
