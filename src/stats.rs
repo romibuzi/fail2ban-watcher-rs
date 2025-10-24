@@ -15,14 +15,16 @@ pub struct Stats {
 
 impl Stats {
     pub fn new(mut banned_ips: Vec<LocatedBannedIp>) -> Stats {
-        let mut number_of_bans_per_country = Stats::get_number_of_bans_per_country(&banned_ips);
+        let is_sorted = banned_ips.is_sorted_by(|a, b| a.number_of_bans >= b.number_of_bans);
+        if !is_sorted {
+            banned_ips.sort_unstable_by(|a, b| b.number_of_bans.cmp(&a.number_of_bans));
+        }
 
-        banned_ips.sort_unstable_by(|a, b| b.number_of_bans.cmp(&a.number_of_bans));
-        number_of_bans_per_country.sort_unstable_by(|a, b| b.number_of_bans.cmp(&a.number_of_bans));
+        let countries_sorted_by_bans_count = Stats::get_number_of_bans_per_country(&banned_ips);
 
         Stats {
             banned_ips_sorted_by_bans_count: banned_ips,
-            countries_sorted_by_bans_count: number_of_bans_per_country,
+            countries_sorted_by_bans_count,
         }
     }
 
@@ -35,13 +37,16 @@ impl Stats {
                 .or_insert(0) += banned_ip.number_of_bans;
         }
 
-        number_of_bans_per_country
+        let mut countries: Vec<CountryBans> = number_of_bans_per_country
             .into_iter()
             .map(|(country_name, number_of_bans)| CountryBans {
                 country_name: country_name.to_string(),
                 number_of_bans,
             })
-            .collect()
+            .collect();
+
+        countries.sort_unstable_by(|a, b| b.number_of_bans.cmp(&a.number_of_bans));
+        countries
     }
 
     pub fn get_top_banned_ips(&self, limit: usize) -> &[LocatedBannedIp] {
