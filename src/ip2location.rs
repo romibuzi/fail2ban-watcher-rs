@@ -19,14 +19,17 @@ impl IP2Location {
     where
         R: std::io::Read,
     {
-        let ranges = reader
+        let ranges: Vec<IPRange> = reader
             .deserialize()
             .filter_map(|row| {
                 let range: Option<IPRange> = row.unwrap_or(None);
                 range
             })
             .collect();
-
+        debug_assert!(
+            ranges.windows(2).all(|pair| pair[0].end < pair[1].start),
+            "IP2Location ranges must be sorted by start and non-overlapping"
+        );
         IP2Location { ranges }
     }
 
@@ -109,6 +112,34 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "IP2Location ranges must be sorted by start")]
+    fn test_build_panics_on_unsorted_ranges() {
+        // Given: second row's start (100) is before the first row's start (200)
+        let data = "200,300,HK,Hong Kong\n\
+                          100,150,CN,China";
+        let mut reader = ReaderBuilder::new()
+            .has_headers(false)
+            .from_reader(data.as_bytes());
+
+        // When / Then
+        IP2Location::from_reader(&mut reader);
+    }
+
+    #[test]
+    #[should_panic(expected = "IP2Location ranges must be sorted by start")]
+    fn test_build_panics_on_overlapping_ranges() {
+        // Given: starts are in order (100 < 150), but ranges overlap (150 falls inside 100..200)
+        let data = "100,200,HK,Hong Kong\n\
+                          150,250,CN,China";
+        let mut reader = ReaderBuilder::new()
+            .has_headers(false)
+            .from_reader(data.as_bytes());
+
+        // When / Then
+        IP2Location::from_reader(&mut reader);
+    }
+
+    #[test]
     fn test_find_country_name_of_ip_found() {
         // Given
         let ip_range_one = IPRange {
@@ -160,6 +191,6 @@ mod tests {
         let result = ip2location.find_country_name_of_ip(target_ip);
 
         // Then
-        assert_eq!(result.is_none(), true);
+        assert!(result.is_none());
     }
 }
