@@ -77,37 +77,23 @@ mod tests {
     use super::*;
     use crate::BannedIp;
 
+    fn located(ip: &str, number_of_bans: u32, country_name: &str) -> LocatedBannedIp {
+        LocatedBannedIp {
+            banned: BannedIp {
+                ip: ip.to_string(),
+                number_of_bans,
+            },
+            country_name: country_name.to_string(),
+        }
+    }
+
     #[test]
     fn test_top_banned_ips() {
         // Given
-        let ip1 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "115.238.245.4".to_string(),
-                number_of_bans: 8,
-            },
-            country_name: "Germany".to_string(),
-        };
-        let ip2 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "223.111.139.244".to_string(),
-                number_of_bans: 5,
-            },
-            country_name: "France".to_string(),
-        };
-        let ip3 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "61.184.247.11".to_string(),
-                number_of_bans: 20,
-            },
-            country_name: "China".to_string(),
-        };
-        let ip4 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "122.226.181.164".to_string(),
-                number_of_bans: 10,
-            },
-            country_name: "China".to_string(),
-        };
+        let ip1 = located("115.238.245.4", 8, "Germany");
+        let ip2 = located("223.111.139.244", 5, "France");
+        let ip3 = located("61.184.247.11", 20, "China");
+        let ip4 = located("122.226.181.164", 10, "China");
         let stats = Stats::new(vec![ip1.clone(), ip2.clone(), ip3.clone(), ip4.clone()]);
 
         // When
@@ -120,41 +106,11 @@ mod tests {
     #[test]
     fn test_top_banned_countries() {
         // Given
-        let ip1 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "115.238.245.4".to_string(),
-                number_of_bans: 8,
-            },
-            country_name: "Germany".to_string(),
-        };
-        let ip2 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "223.111.139.244".to_string(),
-                number_of_bans: 5,
-            },
-            country_name: "France".to_string(),
-        };
-        let ip3 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "61.184.247.11".to_string(),
-                number_of_bans: 20,
-            },
-            country_name: "China".to_string(),
-        };
-        let ip4 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "122.226.181.164".to_string(),
-                number_of_bans: 10,
-            },
-            country_name: "China".to_string(),
-        };
-        let ip5 = LocatedBannedIp {
-            banned: BannedIp {
-                ip: "122.100.156.10".to_string(),
-                number_of_bans: 30,
-            },
-            country_name: "Canada".to_string(),
-        };
+        let ip1 = located("115.238.245.4", 8, "Germany");
+        let ip2 = located("223.111.139.244", 5, "France");
+        let ip3 = located("61.184.247.11", 20, "China");
+        let ip4 = located("122.226.181.164", 10, "China");
+        let ip5 = located("122.100.156.10", 30, "Canada");
         let stats = Stats::new(vec![ip1, ip2, ip3, ip4, ip5]);
 
         // When
