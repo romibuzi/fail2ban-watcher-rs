@@ -22,7 +22,7 @@ cargo build --release
 ### Run
 
 ```bash
-.target/release/fail2ban-watcher-rs --help
+./target/release/fail2ban-watcher-rs --help
 Usage: fail2ban-watcher-rs [OPTIONS]
 
 Options:

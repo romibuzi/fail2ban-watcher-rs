@@ -1,6 +1,5 @@
 use rusqlite::{Connection, Result};
 use std::fmt;
-use std::ops::Deref;
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct BannedIp {
@@ -10,16 +9,8 @@ pub struct BannedIp {
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct LocatedBannedIp {
-    pub ip: BannedIp,
+    pub banned: BannedIp,
     pub country_name: String,
-}
-
-impl Deref for LocatedBannedIp {
-    type Target = BannedIp;
-
-    fn deref(&self) -> &Self::Target {
-        &self.ip
-    }
 }
 
 impl fmt::Display for LocatedBannedIp {
@@ -27,12 +18,21 @@ impl fmt::Display for LocatedBannedIp {
         write!(
             f,
             "{} bans: {} ({})",
-            self.number_of_bans, self.ip.ip, self.country_name
+            self.banned.number_of_bans, self.banned.ip, self.country_name
         )
     }
 }
 
-pub fn get_banned_ips(connection: &Connection) -> Result<Vec<BannedIp>> {
+impl BannedIp {
+    pub fn located(self, country_name: String) -> LocatedBannedIp {
+        LocatedBannedIp {
+            banned: self,
+            country_name,
+        }
+    }
+}
+
+pub fn banned_ips(connection: &Connection) -> Result<Vec<BannedIp>> {
     let mut stmt = connection
         .prepare("SELECT ip, COUNT(ip) AS count FROM bans GROUP BY ip ORDER BY count DESC")?;
     let bans = stmt
@@ -83,10 +83,10 @@ mod tests {
         insert_banned_ip(&connection, "182.54.178.52");
 
         // When
-        let result = get_banned_ips(&connection);
+        let result = banned_ips(&connection);
 
         // Then
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![
